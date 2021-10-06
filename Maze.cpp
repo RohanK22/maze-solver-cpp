@@ -77,7 +77,7 @@ class Maze {
         map<string, int> d; // distances
         map<string, string> p; // parent
 
-        // Initialize Distances
+        // Initialize Variables
         for(int i = 0; i<n; i++) {
             for(int j = 0; j< n; j++) {
                 if(grid[i][j] == 1) continue;
