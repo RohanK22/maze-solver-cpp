@@ -1,0 +1,1 @@
+Run: g++ -o a.out Maze.cpp && ./a.out
