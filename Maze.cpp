@@ -8,9 +8,13 @@ class Maze {
     int n = -1;
     // Grid of 1s and 0s. 1s indicate wall and 0s indicate free path.
     vector<vector<int>> grid;
+    string startCoordinate;
+    string endCoordinate;
 
     Maze(int n) {
         this->n = n;
+        this->startCoordinate = coordinateToString(0,0);
+        this->endCoordinate = coordinateToString(n - 1, n - 1);
     }
 
     void generateRandomGrid() {
@@ -22,12 +26,12 @@ class Maze {
         for(int i = 0; i<n; i++) {
             vector<int> temp;
             for(int j = 0; j< n; j++) {
-                temp.push_back(rand() % 2);
+                temp.push_back(rand() % 10 + 1 > 8);
             }
             grid.push_back(temp);
         }
 
-        // Enter grid at (0,0) and end at (n - 1, n - 1)
+        // Enter grid at (0,0) and end at (n - 1, n - 1) **** Change this
         grid[0][0] = 0;
         grid[n - 1][n - 1] = 0;
     }
@@ -39,28 +43,81 @@ class Maze {
             cout<<endl;
         }
     }
+    
+    void printSolutionGrid(vector<string> path) {
+        cout<<"SOLUTION: "<<endl;
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < n; j++) {
+                if(find(path.begin(), path.end(), coordinateToString(i, j)) == path.end()) {
+                    cout<<grid[i][j]<<' ';
+                } else {
+                    cout<<"* ";
+                }
+            }
+            cout<<endl;
+        }
+        cout<<"STEPS: "<<path.size()<<endl;
+    }
 
     // Solve the maze and returns the path in terms a sequence of coordinates.
-    void solveGridBFS() {
+    vector<string> solveGridBFS() {
         map<string, vector<string>> adjList = getAdjList(); // Build a graph of all grid positions using a adjacency list.
 
         int nNodes = adjList.size(); // number of nodes
-        string s = "0,0"; // source vertex
+        string s = startCoordinate; // source vertex
 
         queue<string> q;
-        vector<bool> used(nNodes);
-        vector<int> d(nNodes); // distances
-        vector<string> p(nNodes); // parent
+        map<string, bool> used;
+        map<string, int> d; // distances
+        map<string, string> p; // parent
+
+        // Initialize Distances
+        for(int i = 0; i<n; i++) {
+            for(int j = 0; j< n; j++) {
+                if(grid[i][j] == 1) continue;
+                string pointStr = coordinateToString(i,j);
+                used[pointStr] = false;
+                d[pointStr] = INT16_MAX;
+                p[pointStr] = "";
+            }
+        }
 
         q.push(s);
         used[s] = true;
+        d[s] = 0;
+        p[s] = "-1";
 
         // Begin BFS
         while(!q.empty()) {
+            string point = q.front();
+            q.pop();
 
+            // cout<<point<<endl;
+            for(string neighbour: adjList[point]) {
+                if(!used[neighbour]) {
+                    // cout<<"N: "<<neighbour<<" of "<<point<<endl;
+                    used[neighbour] = true;
+                    q.push(neighbour);
+                    d[neighbour] = d[point] + 1;
+                    p[neighbour] = point;
+                }
+            }
         }
 
-        return ;
+        vector<string> path;
+
+        // Construct path if possible
+        if(!used[endCoordinate]) {
+            // no possible paths;
+            cout<<"UNSOLVEABLE MAZE"<<endl;
+            return path;
+        } 
+        
+        for(string point = endCoordinate; point != "-1"; point = p[point]) {
+            path.push_back(point);
+        }
+        reverse(path.begin(), path.end());        
+        return path;
     }
 
     map<string, vector<string>> getAdjList() {
@@ -75,7 +132,7 @@ class Maze {
                     paths.push_back(coordinateToString(i - 1, j));
                 }
 
-                if(i + 1 < n - 1 && grid[i + 1][j] == 0) {
+                if(i + 1 < n && grid[i + 1][j] == 0) {
                     paths.push_back(coordinateToString(i + 1, j));
                 }
 
@@ -83,14 +140,15 @@ class Maze {
                     paths.push_back(coordinateToString(i, j - 1));
                 }
 
-                if(j + 1 < n - 1 && grid[i][j + 1] == 0) {
+                if(j + 1 < n && grid[i][j + 1] == 0) {
                     paths.push_back(coordinateToString(i, j + 1));
                 }
                 adjL[coordinateToString(i,j)] = paths;
             }
         }
 
-        /* Print List
+        /* Print List 
+        cout<<"PRINT ADJ LIST"<<endl;
         for ( const auto &myPair : adjL ) {
             cout << myPair.first << "\n";
             for(const auto &li: myPair.second) {
@@ -119,8 +177,18 @@ int main(int argc, char const *argv[])
     m.generateRandomGrid();
     m.printGrid();
 
-    m.solveGridBFS();
+    vector<string> path = m.solveGridBFS();
 
+    if(path.size() == 0) {
+        cout<<"NO PATHS FOUND"<<endl;
+    } else {
+        cout<<"PATH FOUND"<<endl;
+        for(string point: path) {
+            cout<<"  ->  "<<point;
+        }
+        cout<<endl;
 
+        m.printSolutionGrid(path);
+    }
     return 0;
 }
