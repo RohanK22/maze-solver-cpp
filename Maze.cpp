@@ -10,7 +10,8 @@ class Maze {
     vector<vector<int>> grid;
     string startCoordinate;
     string endCoordinate;
-    int probabilityOfBlock = 50; // Percentage
+    int probabilityOfBlock = 30; // Percentage
+    char blockCharcter = 33; // ASCII
 
     Maze(int n) {
         this->n = n;
@@ -24,6 +25,7 @@ class Maze {
             return;
         }
 
+        srand(time(NULL));
         for(int i = 0; i<n; i++) {
             vector<int> temp;
             for(int j = 0; j< n; j++) {
@@ -39,8 +41,11 @@ class Maze {
 
     void printGrid() {
         for(int i = 0; i<n; i++) {
-            for(int j = 0; j< n; j++) 
-                cout<<grid[i][j]<<' ';
+            for(int j = 0; j< n; j++) {
+                if(i == 0 && j == 0) cout<<"S"<<' ';
+                else if ( i == n - 1 && j == n -1) cout<<"E"<<' ';
+                else cout<<(grid[i][j] == 1 ? blockCharcter : '_')<<' ';
+            }
             cout<<endl;
         }
     }
@@ -50,7 +55,7 @@ class Maze {
         for(int i = 0; i < n; i++) {
             for(int j = 0; j < n; j++) {
                 if(find(path.begin(), path.end(), coordinateToString(i, j)) == path.end()) {
-                    cout<<grid[i][j]<<' ';
+                    cout<<(grid[i][j] == 1 ? blockCharcter: '_')<< ' ';
                 } else {
                     cout<<"* ";
                 }
