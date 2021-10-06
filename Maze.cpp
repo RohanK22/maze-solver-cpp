@@ -10,6 +10,7 @@ class Maze {
     vector<vector<int>> grid;
     string startCoordinate;
     string endCoordinate;
+    int probabilityOfBlock = 50; // Percentage
 
     Maze(int n) {
         this->n = n;
@@ -26,7 +27,7 @@ class Maze {
         for(int i = 0; i<n; i++) {
             vector<int> temp;
             for(int j = 0; j< n; j++) {
-                temp.push_back(rand() % 10 + 1 > 8);
+                temp.push_back(rand() % 100 + 1 <= probabilityOfBlock);
             }
             grid.push_back(temp);
         }
@@ -128,21 +129,17 @@ class Maze {
 
                 vector<string> paths;
                 // up left down and right are legal moves from a given grid position.
-                if(i - 1 >= 0 && grid[i - 1][j] == 0) {
-                    paths.push_back(coordinateToString(i - 1, j));
-                }
-
-                if(i + 1 < n && grid[i + 1][j] == 0) {
-                    paths.push_back(coordinateToString(i + 1, j));
-                }
-
-                if(j - 1 >= 0 && grid[i][j - 1] == 0) {
-                    paths.push_back(coordinateToString(i, j - 1));
-                }
-
-                if(j + 1 < n && grid[i][j + 1] == 0) {
-                    paths.push_back(coordinateToString(i, j + 1));
-                }
+                if(i - 1 >= 0) paths.push_back(coordinateToString(i - 1, j));
+                if(i + 1 < n) paths.push_back(coordinateToString(i + 1, j));
+                if(j - 1 >= 0) paths.push_back(coordinateToString(i, j - 1));
+                if(j + 1 < n) paths.push_back(coordinateToString(i, j + 1));
+                
+                // UL, UR, DL, DR are also legal moves
+                if(i - 1 >=0 && j - 1>=0) paths.push_back(coordinateToString(i - 1, j - 1));
+                if(i - 1 >=0 && j + 1 >= 0) paths.push_back(coordinateToString(i - 1, j + 1));
+                if(i + 1 < n && j - 1 >= 0) paths.push_back(coordinateToString(i + 1, j - 1));
+                if(i + 1 < n && j + 1 < n) paths.push_back(coordinateToString(i + 1, j + 1));
+                
                 adjL[coordinateToString(i,j)] = paths;
             }
         }
